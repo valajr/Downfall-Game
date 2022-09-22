@@ -1,3 +1,10 @@
+const MAPPING = {
+    'radius': '2%',
+    'line_style': 'stroke:rgb(0,0,255);stroke-width:2',
+    'floor_distance': 10,
+    'initial_distance': 50
+}
+
 const grid = document.querySelector('.grid-cards');
 let card_01 = new Card(1, "Name 01", "type-01", "./test/img/luffy.jpg", "./test/img/luffy.jpeg", "Description 01");
 card_01.action = () => {
@@ -16,7 +23,7 @@ grid.appendChild(card_01.toHTML());
 grid.appendChild(card_02.toHTML());
 grid.appendChild(card_03.toHTML());
 
-const createSvg = (type, cl=null, attrs=null) => {
+function createSvg(type, cl=null, attrs=null) {
     let xmlns = "http://www.w3.org/2000/svg";
     let element = document.createElementNS(xmlns, type);
 
@@ -31,31 +38,19 @@ const createSvg = (type, cl=null, attrs=null) => {
     return element;
 }
 
-function inicializateMap(map) {
-    let lvl_0 = createSvg('circle', ['room', 0], {'id':0, 'cx':'50%', 'cy':'5%', r:'2%'});
-    map.appendChild(lvl_0);
-    let lvl_1 = Path.getRoomsByLvl(1);
-    let x1 = 50;
-    let y1 = 5;
-    let y = 20;
-    for(let c=0; c<lvl_1.length; c++) {
-        let x = (100/(lvl_1.length + 1))*(c + 1);
-        let path = createSvg('line', ['path', lvl_1[c].id], 
-                    {'x1':`${x1}%`, 'y1':`${y1}%`, 'x2':`${x}%`, 'y2':`${y}%`, 'style':"stroke:rgb(0,0,255);stroke-width:2"});
-        map.appendChild(path);
-    }
-
-
-    for(let floor=0; floor<lvl_max; floor++) {
-        let lvl_rooms = Path.getRoomsByLvl(floor+1);
+function updateMap(lvl, map) {
+    map.innerHTML = '';
+    let periculosidade = lvl*MAPPING.floor_distance;
+    for(let floor=0; floor<Path.rooms[Path.rooms.length - 1].lvl; floor++) {
+        let lvl_rooms = Path.getRoomsByLvl(floor);
         let max_rooms = lvl_rooms.length;
         for(let r=0; r<max_rooms; r++) {
             let x = (100/(max_rooms + 1))*(r + 1);
-            let y = (floor + 1)*20;
+            let y = (floor)*MAPPING.floor_distance + MAPPING.initial_distance - periculosidade;
             let actual_room = lvl_rooms[r];
-            let room = createSvg('circle', ['room'], {'id':actual_room.id, 'cx':`${x}%`, 'cy':`${y}%`, 'r':'2%'});
+            let room = createSvg('circle', ['room'], {'id':actual_room.id, 'cx':`${x}%`, 'cy':`${y}%`, 'r':MAPPING.radius});
             if(actual_room.connections.prev.length > 0) {
-                prev_floor = Path.getRoomsByLvl(floor);
+                prev_floor = Path.getRoomsByLvl(floor-1);
                 for(let c=0; c<actual_room.connections.prev.length; c++) {
                     let connection = 0;
                     for(let i=0; i<prev_floor.length; i++) {
@@ -65,9 +60,9 @@ function inicializateMap(map) {
                         }
                     }
                     let x1 = (100/(prev_floor.length + 1))*(connection + 1);
-                    let y1 = floor*20;
+                    let y1 = (floor - 1)*MAPPING.floor_distance + MAPPING.initial_distance - periculosidade;
                     let path = createSvg('line', ['path', actual_room.connections.prev[c]], 
-                    {'x1':`${x1}%`, 'y1':`${y1}%`, 'x2':`${x}%`, 'y2':`${y}%`, 'style':"stroke:rgb(0,0,255);stroke-width:2"});
+                    {'x1':`${x1}%`, 'y1':`${y1}%`, 'x2':`${x}%`, 'y2':`${y}%`, 'style':MAPPING.line_style});
                     map.appendChild(path);
                 }
             }
@@ -76,8 +71,29 @@ function inicializateMap(map) {
     }
 }
 
+function initializeMap() {
+    const map = document.querySelector('.map');
+    Path.createPath(16, 3, false);
+    let lvl_0 = new Room(0, [], Path.getRoomsByLvl(1), 0);
+    Path.rooms.unshift(lvl_0);
+    let lvl_1 = Path.getRoomsByLvl(1);
+    for(r in lvl_1) {
+        r = parseInt(r);
+        lvl_1[r].connections.prev = [0];
+    }
+    updateMap(0, map);
+    return map;
+}
 
-const map = document.querySelector('.map');
-lvl_max = Path.createPath(16, 3, false);
+map = initializeMap();
+
 console.log(Path.rooms);
-inicializateMap(map);
+setTimeout(() => {
+    updateMap(1, map);
+  }, "2000");
+setTimeout(() => {
+    updateMap(2, map);
+  }, "4000");
+  setTimeout(() => {
+      updateMap(1, map);
+    }, "6000");
