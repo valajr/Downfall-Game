@@ -11,14 +11,14 @@
 
 body {
     background-color: #609647;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 0.7fr 0.3fr;
 }
 
 .container {
-    display: grid;
-    grid-template-columns: 3fr 1fr;
-    width: 90%;
+    display: flex;
+    flex-direction: column;
+    width: 95%;
     min-height: 100vh;
     align-items: center;
     justify-content: center;
@@ -35,12 +35,12 @@ body {
 
 .information-bar {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
 }
 
 .map {
-    margin: 30px;
     height: 90%;
+    width: 80%;
     background-color: red;
     border: 2px solid black;
     border-radius: 5px;
