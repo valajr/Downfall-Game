@@ -1,3 +1,2 @@
-getCards();
-
 let map = initializeMap();
+getCards();
