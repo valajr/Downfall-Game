@@ -1,2 +1,2 @@
-let map = initializeMap();
-getCards();
+const map = document.querySelector('.map');
+createPlayer(map);

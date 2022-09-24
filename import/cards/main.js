@@ -2,27 +2,24 @@ const CARDS = {
     'gold': {
         'name': 'Gold',
         'img_front': '',
-        'img_back': '',
         'description': 'You found some gold in this room.'
     },
     'arrow': {
         'name': 'Arrow',
         'img_front': '',
-        'img_back': '',
         'description': 'You found some arrows in this room.'
     },
     'battle': {
         'name': 'Battle',
         'img_front': '',
-        'img_back': '',
         'description': 'You encounter some enemies, be carefull.'
     },
     'fountain': {
         'name': 'Fountain of Life',
         'img_front': '',
-        'img_back': '',
         'description': 'You encounter a fountain of life, get a little rest and recover your HP.'
-    }
+    },
+    'img_back': ''
 }
 
 const ENEMY = {
@@ -70,47 +67,114 @@ const ENEMY = {
         'defense': 5,
         'initiative': 50,
         'skill': ''
+    },
+    'max_enemies': 3,
+}
+
+function getRandom(max) {
+    return Math.floor(Math.random() * max);
+}
+
+function createEnemy(tribe) {
+    let random;
+    let enemy;
+    switch(tribe) {
+        case 'barbarian':
+            random = getRandom(ENEMY.barbarian.name.length);
+            enemy = new Char(ENEMY.barbarian.name[random], ENEMY.barbarian.life, ENEMY.barbarian.max_life,
+                ENEMY.barbarian.attack, ENEMY.barbarian.defense, ENEMY.barbarian.initiative);
+            enemy.skill = ENEMY.barbarian.skill;
+            break;
+        case 'zombie':
+            random = getRandom(ENEMY.zombie.name.length);
+            enemy = new Char(ENEMY.zombie.name[random], ENEMY.zombie.life, ENEMY.zombie.max_life,
+                ENEMY.zombie.attack, ENEMY.zombie.defense, ENEMY.zombie.initiative);
+            enemy.skill = ENEMY.zombie.skill;
+            break;
+        case 'skeleton':
+            random = getRandom(ENEMY.skeleton.name.length);
+            enemy = new Char(ENEMY.skeleton.name[random], ENEMY.skeleton.life, ENEMY.skeleton.max_life,
+                ENEMY.skeleton.attack, ENEMY.skeleton.defense, ENEMY.skeleton.initiative);
+            enemy.skill = ENEMY.skeleton.skill;
+            break;
+        case 'ghost':
+            random = getRandom(ENEMY.ghost.name.length);
+            enemy = new Char(ENEMY.ghost.name[random], ENEMY.ghost.life, ENEMY.ghost.max_life,
+                ENEMY.ghost.attack, ENEMY.ghost.defense, ENEMY.ghost.initiative);
+            enemy.skill = ENEMY.ghost.skill;
+            break;
+        case 'demon':
+            random = getRandom(ENEMY.demon.name.length);
+            enemy = new Char(ENEMY.demon.name[random], ENEMY.demon.life, ENEMY.demon.max_life,
+                ENEMY.demon.attack, ENEMY.demon.defense, ENEMY.demon.initiative);
+            enemy.skill = ENEMY.demon.skill;
     }
+    return enemy;
 }
 
 function createCard(id, type, lvl) {
     let card;
     switch(type) {
-        case gold:
+        case 'gold':
             card = new Card(id, CARDS.gold.name, type, CARDS.gold.img_front, 
-                CARDS.gold.img_back, CARDS.gold.description);
+                CARDS.img_back, CARDS.gold.description);
             card.action = () => Player.gold += 5*lvl;
             break;
-        case arrow:
+        case 'arrow':
             card = new Card(id, CARDS.arrow.name, type, CARDS.arrow.img_front, 
-                CARDS.arrow.img_back, CARDS.arrow.description);
+                CARDS.img_back, CARDS.arrow.description);
             card.action = () => Player.arrow += 1*lvl;
             break;
-        case battle:
+        case 'battle':
             card = new Card(id, CARDS.battle.name, type, CARDS.battle.img_front, 
-                CARDS.battle.img_back, CARDS.battle.description);
+                CARDS.img_back, CARDS.battle.description);
             card.action = () => {
+                let enemies = [];
+                let max_enemies = getRandom(ENEMY.max) + 1;
                 switch(lvl) {
-                    case 1: //Barbarian 8
+                    case 1:
+                        for(let enemy=0; enemy<max_enemies; enemy++)
+                            Battle.addEnemy(createEnemy('barbarian'));
                         break;
-                    case 2: //Zombies 9
+                    case 2:
+                        for(let enemy=0; enemy<max_enemies; enemy++)
+                            Battle.addEnemy(createEnemy('zombies'));
                         break;
-                    case 3: //Skeleton 6
+                    case 3:
+                        for(let enemy=0; enemy<max_enemies; enemy++)
+                            Battle.addEnemy(createEnemy('skeleton'));
                         break;
-                    case 4: //Ghost 6
+                    case 4:
+                        for(let enemy=0; enemy<max_enemies; enemy++)
+                            Battle.addEnemy(createEnemy('ghost'));
                         break;
-                    case Path.rooms[Path.rooms.length - 1].lvl: //Demon 4
+                    case Path.rooms[Path.rooms.length - 1].lvl:
+                        Battle.addEnemy(createEnemy('demon'));
                         break;
-                    default: //3 variado
-                        break;
+                    default:
+                        for(let enemy=0; enemy<max_enemies; enemy++) {
+                            let random = getRandom(4);
+                            switch(random) {
+                                case 0:
+                                    Battle.addEnemy(createEnemy('barbarian'));
+                                    break;
+                                case 1:
+                                    Battle.addEnemy(createEnemy('zombies'));
+                                    break;
+                                case 2:
+                                    Battle.addEnemy(createEnemy('skeleton'));
+                                    break;
+                                case 3:
+                                    Battle.addEnemy(createEnemy('ghost'));
+                                    break;
+                            }
+                        }
                 }
-                for(e=0; e<enemies.length; e++) 
-                    Battle.addEnemy(enemies[e]);
             };
             break;
-        case fountain:
+        case 'fountain':
             card = new Card(id, CARDS.fountain.name, type, CARDS.fountain.img_front, 
-                CARDS.fountain.img_back, CARDS.fountain.description);
+                CARDS.img_back, CARDS.fountain.description);
             card.action = () => {
                 for(a=0; a < Battle.allies.length; a++)
                     Battle.allies[a].life += 5*lvl;
@@ -119,25 +183,82 @@ function createCard(id, type, lvl) {
     return card;
 }
 
-function getCards() {  
-    // Por andar: 1 > Battle; 2 > Battle && (gold || arrow || fountain); 
-    // 3 > Battle && (gold || arrow || fountain) && (gold || arrow);
-    
-    const grid = document.querySelector('.grid-cards');
-    let card_01 = new Card(1, "Name 01", "type-01", "./test/img/luffy.jpg", "./test/img/luffy.jpeg", "Description 01");
-    card_01.action = () => {
-        console.log('Card 01 flipped');
-    };
-    let card_02 = new Card(2, "Name 02", "type-02", "./test/img/luffy.jpg", "./test/img/luffy.jpeg", "Description 02");
-    card_02.action = () => {
-        console.log('Card 02 flipped');
-    };
-    let card_03 = new Card(3, "Name 03", "type-03", "./test/img/luffy.jpg", "./test/img/luffy.jpeg", "Description 03");
-    card_03.action = () => {
-        console.log('Card 03 flipped');
-    };
+function createDeck() {
+    let random;
+    let id = 1;
+    let card_row = [];
+    for(let lvl=1; lvl<Path.rooms[Path.rooms.length - 1].lvl + 1; lvl++) {
+        floor = Path.getRoomsByLvl(lvl);
+        if(floor.length == 1) {
+            Deck.addCard(createCard(id, 'battle', lvl));
+            id++;
+        }
+        else if(floor.length == 2) {
+            card_row.push(createCard(0, 'battle', lvl));
 
-    grid.appendChild(card_01.toHTML());
-    grid.appendChild(card_02.toHTML());
-    grid.appendChild(card_03.toHTML());
+            random = getRandom(100);
+            if(random < 33)
+                card_row.push(createCard(0, 'fountain', lvl));
+            else if(random < 66)
+                card_row.push(createCard(0, 'arrow', lvl));
+            else
+                card_row.push(createCard(0, 'gold', lvl));
+
+            random = getRandom(100);
+            if(random < 50) {
+                card_row[0].id = id;
+                id++;
+                Deck.addCard(card_row.shift());
+                card_row[0].id = id;
+                id++;
+                Deck.addCard(card_row.shift());
+            }
+            else {
+                card_row[1].id = id;
+                id++;
+                Deck.addCard(card_row.pop());
+                card_row[0].id = id;
+                id++;
+                Deck.addCard(card_row.pop());
+            }
+        }
+        else {
+            card_row.push(createCard(0, 'battle', lvl));
+
+            random = getRandom(100);
+            if(random < 33)
+                card_row.push(createCard(0, 'fountain', lvl));
+            else if(random < 66)
+                card_row.push(createCard(0, 'arrow', lvl));
+            else
+                card_row.push(createCard(0, 'gold', lvl));
+
+            for(let i=0; i<floor.length-2; i++) {
+                random = getRandom(100);
+                if(random < 50)
+                    card_row.push(createCard(0, 'arrow', lvl));
+                else
+                    card_row.push(createCard(0, 'gold', lvl));
+            }
+            
+            random = getRandom(100);
+            if(random < 50) {
+                for(let card=0; card<floor.length; card++) {
+                    card_row[0].id = id;
+                    id++;
+                    Deck.addCard(card_row.shift());
+                }
+            }
+            else {
+                for(let card=0; card<floor.length; card++) {
+                    card_row[card_row.length - 1].id = id;
+                    id++;
+                    Deck.addCard(card_row.pop());
+                }
+            }
+        }
+    }
+    for(let room=0; room<Path.rooms.length-1; room++) {
+        Path.rooms[room].door = Deck.getCardById(room);
+    }
 }

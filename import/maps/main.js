@@ -53,8 +53,7 @@ function updateMap(lvl, map) {
     }
 }
 
-function initializeMap() {
-    const map = document.querySelector('.map');
+function initializeMap(map) {
     Path.createPath(16, 3, false);
     let lvl_0 = new Room(0, [], Path.getRoomsByLvl(1), 0);
     Path.rooms.unshift(lvl_0);
@@ -64,5 +63,4 @@ function initializeMap() {
         lvl_1[r].connections.prev = [0];
     }
     updateMap(0, map);
-    return map;
 }
