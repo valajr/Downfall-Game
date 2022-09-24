@@ -134,42 +134,45 @@ function createCard(id, type, lvl) {
                 switch(lvl) {
                     case 1:
                         for(let enemy=0; enemy<max_enemies; enemy++)
-                            Battle.addEnemy(createEnemy('barbarian'));
+                            enemies.push(createEnemy('barbarian'));
                         break;
                     case 2:
                         for(let enemy=0; enemy<max_enemies; enemy++)
-                            Battle.addEnemy(createEnemy('zombies'));
+                            enemies.push(createEnemy('zombies'));
                         break;
                     case 3:
                         for(let enemy=0; enemy<max_enemies; enemy++)
-                            Battle.addEnemy(createEnemy('skeleton'));
+                            enemies.push(createEnemy('skeleton'));
                         break;
                     case 4:
                         for(let enemy=0; enemy<max_enemies; enemy++)
-                            Battle.addEnemy(createEnemy('ghost'));
+                            enemies.push(createEnemy('ghost'));
                         break;
                     case Path.rooms[Path.rooms.length - 1].lvl:
-                        Battle.addEnemy(createEnemy('demon'));
+                        enemies.push(createEnemy('demon'));
                         break;
                     default:
                         for(let enemy=0; enemy<max_enemies; enemy++) {
                             let random = getRandom(4);
                             switch(random) {
                                 case 0:
-                                    Battle.addEnemy(createEnemy('barbarian'));
+                                    enemies.push(createEnemy('barbarian'));
                                     break;
                                 case 1:
-                                    Battle.addEnemy(createEnemy('zombies'));
+                                    enemies.push(createEnemy('zombies'));
                                     break;
                                 case 2:
-                                    Battle.addEnemy(createEnemy('skeleton'));
+                                    enemies.push(createEnemy('skeleton'));
                                     break;
                                 case 3:
-                                    Battle.addEnemy(createEnemy('ghost'));
+                                    enemies.push(createEnemy('ghost'));
                                     break;
                             }
                         }
                 }
+                console.log(enemies);
+                for(e=0; e<enemies.length; e++) 
+                    Battle.addEnemy(enemies[e]);
             };
             break;
         case 'fountain':
