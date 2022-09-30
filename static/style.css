@@ -45,3 +45,29 @@ body {
     border: 2px solid black;
     border-radius: 5px;
 }
+
+.path {
+    stroke:rgb(0,0,255);
+    stroke-width:2;
+}
+
+.revealed {
+    fill: skyblue; 
+    stroke: cadetblue; 
+    stroke-width: 2;
+}
+
+.grid-battle {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-areas: 'player . enemy01 enemy02 enemy03';
+    gap: 15px;
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+#player { grid-area: player; }
+#enemy-01 { grid-area: enemy01; }
+#enemy-02 { grid-area: enemy02; }
+#enemy-03 { grid-area: enemy03; }

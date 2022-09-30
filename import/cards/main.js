@@ -76,39 +76,16 @@ function getRandom(max) {
 }
 
 function createEnemy(tribe) {
-    let random;
-    let enemy;
-    switch(tribe) {
-        case 'barbarian':
-            random = getRandom(ENEMY.barbarian.name.length);
-            enemy = new Char(ENEMY.barbarian.name[random], ENEMY.barbarian.life, ENEMY.barbarian.max_life,
-                ENEMY.barbarian.attack, ENEMY.barbarian.defense, ENEMY.barbarian.initiative);
-            enemy.skill = ENEMY.barbarian.skill;
-            break;
-        case 'zombie':
-            random = getRandom(ENEMY.zombie.name.length);
-            enemy = new Char(ENEMY.zombie.name[random], ENEMY.zombie.life, ENEMY.zombie.max_life,
-                ENEMY.zombie.attack, ENEMY.zombie.defense, ENEMY.zombie.initiative);
-            enemy.skill = ENEMY.zombie.skill;
-            break;
-        case 'skeleton':
-            random = getRandom(ENEMY.skeleton.name.length);
-            enemy = new Char(ENEMY.skeleton.name[random], ENEMY.skeleton.life, ENEMY.skeleton.max_life,
-                ENEMY.skeleton.attack, ENEMY.skeleton.defense, ENEMY.skeleton.initiative);
-            enemy.skill = ENEMY.skeleton.skill;
-            break;
-        case 'ghost':
-            random = getRandom(ENEMY.ghost.name.length);
-            enemy = new Char(ENEMY.ghost.name[random], ENEMY.ghost.life, ENEMY.ghost.max_life,
-                ENEMY.ghost.attack, ENEMY.ghost.defense, ENEMY.ghost.initiative);
-            enemy.skill = ENEMY.ghost.skill;
-            break;
-        case 'demon':
-            random = getRandom(ENEMY.demon.name.length);
-            enemy = new Char(ENEMY.demon.name[random], ENEMY.demon.life, ENEMY.demon.max_life,
-                ENEMY.demon.attack, ENEMY.demon.defense, ENEMY.demon.initiative);
-            enemy.skill = ENEMY.demon.skill;
+    if(!(tribe in ENEMY)) {
+        let random = getRandom(Object.keys(ENEMY).length);
+        tribe = Object.keys(ENEMY)[random];
     }
+
+    let random_name = getRandom(ENEMY[tribe].name.length);
+    let enemy = new Char(ENEMY[tribe].name[random_name], ENEMY[tribe].life, ENEMY[tribe].max_life,
+        ENEMY[tribe].attack, ENEMY[tribe].defense, ENEMY[tribe].initiative);
+    enemy.skill = ENEMY[tribe].skill;
+
     return enemy;
 }
 
@@ -130,47 +107,36 @@ function createCard(id, type, lvl) {
                 CARDS.img_back, CARDS.battle.description);
             card.action = () => {
                 let enemies = [];
-                let max_enemies = getRandom(ENEMY.max) + 1;
+                let max_enemies = getRandom(ENEMY.max_enemies) + 1;
                 switch(lvl) {
                     case 1:
-                        for(let enemy=0; enemy<max_enemies; enemy++)
+                        for(let e=0; e<max_enemies; e++) {
                             enemies.push(createEnemy('barbarian'));
+                        }
                         break;
                     case 2:
-                        for(let enemy=0; enemy<max_enemies; enemy++)
-                            enemies.push(createEnemy('zombies'));
+                        for(let e=0; e<max_enemies; e++) {
+                            enemies.push(createEnemy('zombie'));
+                        }
                         break;
                     case 3:
-                        for(let enemy=0; enemy<max_enemies; enemy++)
+                        for(let e=0; e<max_enemies; e++) {
                             enemies.push(createEnemy('skeleton'));
+                        }
                         break;
                     case 4:
-                        for(let enemy=0; enemy<max_enemies; enemy++)
+                        for(let e=0; e<max_enemies; e++) {
                             enemies.push(createEnemy('ghost'));
+                        }
                         break;
                     case Path.rooms[Path.rooms.length - 1].lvl:
                         enemies.push(createEnemy('demon'));
                         break;
                     default:
-                        for(let enemy=0; enemy<max_enemies; enemy++) {
-                            let random = getRandom(4);
-                            switch(random) {
-                                case 0:
-                                    enemies.push(createEnemy('barbarian'));
-                                    break;
-                                case 1:
-                                    enemies.push(createEnemy('zombies'));
-                                    break;
-                                case 2:
-                                    enemies.push(createEnemy('skeleton'));
-                                    break;
-                                case 3:
-                                    enemies.push(createEnemy('ghost'));
-                                    break;
-                            }
+                        for(let e=0; e<max_enemies; e++) {
+                            enemies.push(createEnemy());
                         }
                 }
-                console.log(enemies);
                 for(e=0; e<enemies.length; e++) 
                     Battle.addEnemy(enemies[e]);
             };
@@ -261,7 +227,20 @@ function createDeck() {
             }
         }
     }
-    for(let room=0; room<Path.rooms.length-1; room++) {
+    for(let room=0; room<Path.rooms.length-1; room++) 
         Path.rooms[room].door = Deck.getCardById(room);
-    }
+}
+
+function showCards(id, grid) {
+    grid.innerHTML = '';
+    let room = Path.getRoomById(id);
+    let cards_id = room.connections.next;
+
+    for(let card=0; card<cards_id.length; card++)
+        grid.appendChild(Deck.getCardById(cards_id[card]).toHTML());
+}
+
+function createSimpleCardHTML(id, name, type, img_front) {
+    let card = new Card(id, name, type, img_front, CARDS.img_back);
+    return card.toHTML();
 }

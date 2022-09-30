@@ -1,6 +1,5 @@
 const MAPPING = {
     'radius': '2%',
-    'line_style': 'stroke:rgb(0,0,255);stroke-width:2',
     'floor_distance': 10,
     'initial_distance': 50
 }
@@ -55,12 +54,27 @@ function updateMap(lvl, map) {
 
 function initializeMap(map) {
     Path.createPath(16, 3, false);
-    let lvl_0 = new Room(0, [], Path.getRoomsByLvl(1), 0);
-    Path.rooms.unshift(lvl_0);
+
+    let next = [];
     let lvl_1 = Path.getRoomsByLvl(1);
-    for(r in lvl_1) {
-        r = parseInt(r);
-        lvl_1[r].connections.prev = [0];
+
+    for(let room=0; room<lvl_1.length; room++) {
+        lvl_1[room].connections.prev = [0];
+        next.push(lvl_1[room].id);
     }
+
+    let lvl_0 = new Room(0, [], next, 0);
+    Path.rooms.unshift(lvl_0);
     updateMap(0, map);
+}
+
+function revealElements(revealed_ids) {
+    for(let id=0; id<revealed_ids.length; id++) {
+        let room = document.getElementById(revealed_ids[id]);
+        room.className.baseVal = "room revealed";
+
+        let path = document.getElementsByClassName(revealed_ids[id]);
+        for(let p=0; p<path.length; p++)
+            path[p].className.baseVal = `path ${revealed_ids[id]} revealed`;
+    }
 }
