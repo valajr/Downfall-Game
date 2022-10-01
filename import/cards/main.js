@@ -2,12 +2,12 @@ const CARDS = {
     'gold': {
         'name': 'Gold',
         'img_front': '',
-        'description': 'You found some gold in this room.'
+        'description': 'In this room, you found '
     },
     'arrow': {
         'name': 'Arrow',
         'img_front': '',
-        'description': 'You found some arrows in this room.'
+        'description': 'In this room, you found '
     },
     'battle': {
         'name': 'Battle',
@@ -19,7 +19,8 @@ const CARDS = {
         'img_front': '',
         'description': 'You encounter a fountain of life, get a little rest and recover your HP.'
     },
-    'img_back': ''
+    'img_back': '',
+    'timeout': 3000
 }
 
 const ENEMY = {
@@ -71,10 +72,6 @@ const ENEMY = {
     'max_enemies': 3,
 }
 
-function getRandom(max) {
-    return Math.floor(Math.random() * max);
-}
-
 function createEnemy(tribe) {
     if(!(tribe in ENEMY)) {
         let random = getRandom(Object.keys(ENEMY).length);
@@ -94,13 +91,19 @@ function createCard(id, type, lvl) {
     switch(type) {
         case 'gold':
             card = new Card(id, CARDS.gold.name, type, CARDS.gold.img_front, 
-                CARDS.img_back, CARDS.gold.description);
-            card.action = () => Player.gold += 5*lvl;
+                CARDS.img_back, CARDS.gold.description + `${5*lvl} gold.`);
+            card.action = () => {
+                Player.gold += 5*lvl;
+                setTimeout(function () {updateLevel(card.id, lvl)}, CARDS.timeout);
+            }
             break;
         case 'arrow':
             card = new Card(id, CARDS.arrow.name, type, CARDS.arrow.img_front, 
-                CARDS.img_back, CARDS.arrow.description);
-            card.action = () => Player.arrow += 1*lvl;
+                CARDS.img_back, CARDS.arrow.description + `${lvl} arrows.`);
+            card.action = () => {
+                Player.arrow += lvl;
+                setTimeout(function () {updateLevel(card.id, lvl)}, CARDS.timeout);
+            }
             break;
         case 'battle':
             card = new Card(id, CARDS.battle.name, type, CARDS.battle.img_front, 
@@ -139,14 +142,20 @@ function createCard(id, type, lvl) {
                 }
                 for(e=0; e<enemies.length; e++) 
                     Battle.addEnemy(enemies[e]);
+                last_battle = card.id;
+                setTimeout(startBattle, CARDS.timeout);
             };
             break;
         case 'fountain':
             card = new Card(id, CARDS.fountain.name, type, CARDS.fountain.img_front, 
                 CARDS.img_back, CARDS.fountain.description);
             card.action = () => {
-                for(a=0; a < Battle.allies.length; a++)
+                for(a=0; a < Battle.allies.length; a++) {
                     Battle.allies[a].life += 5*lvl;
+                    if(Battle.allies[a].life > Battle.allies[a].max_life)
+                        Battle.allies[a].life = Battle.allies[a].max_life
+                }
+                setTimeout(function () {updateLevel(card.id, lvl)}, CARDS.timeout);
             };
     }
     return card;
@@ -234,13 +243,13 @@ function createDeck() {
 function showCards(id, grid) {
     grid.innerHTML = '';
     let room = Path.getRoomById(id);
-    let cards_id = room.connections.next;
+    let cards_id = room.connections.next.sort();
 
     for(let card=0; card<cards_id.length; card++)
         grid.appendChild(Deck.getCardById(cards_id[card]).toHTML());
 }
 
-function createSimpleCardHTML(id, name, type, img_front) {
-    let card = new Card(id, name, type, img_front, CARDS.img_back);
+function createSimpleCardHTML(id, name, type, img_front, description) {
+    let card = new Card(id, name, type, img_front, CARDS.img_back, description);
     return card.toHTML();
 }

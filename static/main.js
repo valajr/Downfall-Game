@@ -2,6 +2,7 @@ const map = document.querySelector('.map');
 const cards = document.querySelector('.grid-cards');
 const battle = document.querySelector('.grid-battle');
 let revealed_ids = [];
+let last_battle = 0;
 
 class Player {
     static gold = 0;
@@ -30,6 +31,7 @@ function createPlayer() {
 }
 
 function updateLevel(id, lvl) {
+    battle.innerHTML = '';
     showCards(id, cards);
     updateMap(lvl, map);
     
@@ -37,4 +39,10 @@ function updateLevel(id, lvl) {
     revealElements(revealed_ids);
 }
 
+function startBattle() {
+    cards.innerHTML = '';
+    initializeBattle(battle);
+}
+
 createPlayer();
+updateLevel(0,0);
