@@ -60,8 +60,8 @@ body {
 .grid-battle {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    grid-template-areas: 'player  .  enemy01 enemy02 enemy03'
-                         'back escape attack autoatk confirm';
+    grid-template-areas: 'player   .  enemy01 enemy02 enemy03'
+                         '   .   back  escape  attack autoatk';
     gap: 15px;
     width: 100%;
     max-width: 1000px;
@@ -76,7 +76,6 @@ body {
 #auto-atk { grid-area: autoatk; }
 #attack   { grid-area: attack;  }
 #escape   { grid-area: escape;  }
-#confirm  { grid-area: confirm; }
 
 .button {
     border: 3px solid transparent;

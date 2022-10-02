@@ -39,8 +39,51 @@ function updateLifes() {
     }
 }
 
-function backButton() {
+function changeTurn(team) {
+    let escape = document.querySelector('#escape');
+    let attack = document.querySelector('#attack');
+    let auto_atk = document.querySelector('#auto-atk');
 
+    if(team === 'allies') {
+        escape.disabled = false;
+        attack.disabled = false;
+        auto_atk.disabled = false;
+        Battle.updateTurn('allies');
+    }
+    else {
+        escape.disabled = true;
+        attack.disabled = true;
+        auto_atk.disabled = true;
+        Battle.updateTurn('enemies');
+    }
+}
+
+function enemyTurn() {
+    changeTurn('enemies');
+    for(let enemy=0; enemy<Battle.enemies.length; enemy++) {
+        if(Battle.enemies[enemy].life && Battle.end_game === null) {
+            Battle.autoAttack(Battle.enemies[enemy]);
+            updateLifes();
+        }
+    }
+    changeTurn('allies');
+}
+
+function backButton() {
+    let back = document.querySelector('#back');
+    back.setAttribute('hidden', true);
+    
+    let escape = document.querySelector('#escape');
+    let attack = document.querySelector('#attack');
+    let auto_atk = document.querySelector('#auto-atk');
+    escape.innerHTML = 'Escape';
+    escape.onclick = escapeButton;
+    attack.innerHTML = 'Attack';
+    attack.onclick = atkButton;
+    attack.removeAttribute('hidden', true);
+    auto_atk.innerHTML = 'Auto attack';
+    auto_atk.onclick = autoButton;
+    auto_atk.removeAttribute('hidden', true);
 }
 
 function escapeButton() {
@@ -52,27 +95,54 @@ function escapeButton() {
 }
 
 function atkButton() {
-
+    let back = document.querySelector('#back');
+    back.removeAttribute('hidden');
+    
+    let enemies = [];
+    let number_enemies = Battle.enemies.length;
+    enemies.push(document.querySelector('#escape'));
+    enemies.push(document.querySelector('#attack'));
+    enemies.push(document.querySelector('#auto-atk'));
+    for(let e=0; e< number_enemies; e++) {
+        enemies[e].innerHTML = Battle.enemies[e].name;
+        enemies[e].onclick = () => {
+            if(Player.arrows > 0) {
+                Battle.normalAttack(Battle.allies[0], Battle.enemies[e]);
+                updateLifes();
+                Player.arrows -= 1;
+                updateInfoBar();
+                if(!Battle.end_game)
+                    enemyTurn();
+            }
+            else {
+                alert('No arrows! Try to escape!');
+            }
+            backButton();
+        };
+    }
+    if(number_enemies < 3) {
+        enemies[2].setAttribute('hidden', true);
+        if(number_enemies < 2)
+            enemies[1].setAttribute('hidden', true);
+    }
 }
 
 function autoButton() {
     if(Player.arrows > 0) {
         Battle.autoAttack(Battle.allies[0]);
         updateLifes();
-        Player.arrows--;
+        Player.arrows -= 1;
+        updateInfoBar();
+        if(!Battle.end_game)
+            enemyTurn();
     }
     else
         alert('No arrows! Try to escape!');
 }
 
-function confirmButton() {
-
-}
-
 function initializeBattle(battle) {
     battle.innerHTML = '';
     Battle.end_game = null;
-    Battle.removeEnemies();
 
     let enemies_img = [];
     let enemies_type = [];
@@ -117,43 +187,48 @@ function initializeBattle(battle) {
         `${Battle.enemies[e].life}/${Battle.enemies[e].max_life}`));
     }
 
-    let back = createButton('back', 'button', '<< Back', backButton);
-    let escape = createButton('escape', 'button', 'Escape', escapeButton);
-    let attack = createButton('attack', 'button', 'Attack', atkButton);
-    let auto_attack = createButton('auto-atk', 'button', 'Auto attack', autoButton);
-    let confirm = createButton('confirm', 'button', 'Confirm', confirmButton);
+    let back = createHTML('button', 'back', 'button', '<< Back', backButton);
+    let escape = createHTML('button', 'escape', 'button', 'Escape', escapeButton);
+    let attack = createHTML('button', 'attack', 'button', 'Attack', atkButton);
+    let auto_attack = createHTML('button', 'auto-atk', 'button', 'Auto attack', autoButton);
 
     back.setAttribute('hidden', true);
-    confirm.setAttribute('hidden', true);
 
     battle.appendChild(back);
     battle.appendChild(escape);
     battle.appendChild(attack);
     battle.appendChild(auto_attack);
-    battle.appendChild(confirm);
+}
+
+function getLoot(lvl) {
+    Player.arrows += lvl;
+    Player.gold += 4*lvl;
 }
 
 Battle.win = () => {
     setTimeout(() => {
-        // get loot (random number of arrows and some gold)
-
         alert("You win the battle!");
 
+        Battle.enemies = [];
         let lvl = Path.getRoomById(last_battle);
         lvl = lvl.lvl;
+        getLoot(lvl);
         updateLevel(last_battle, lvl);
     }, 1000);
 }
 
 Battle.lose = () => {
+    alert("You lose the battle!\nTry again in another life.");
 
+    Battle.enemies = [];
+    window.location.reload();
 }
 
 Battle.escape = () => {
     alert("Escaped!")
 
-    let id = revealed_ids[revealed_ids.length-1];
-    let lvl = Path.getRoomById(id);
-    lvl = lvl.lvl;
+    Battle.enemies = [];
+    id = revealed_ids[revealed_ids.length - 1];
+    let lvl = Path.getRoomById(id).lvl;
     updateLevel(id, lvl);
 }

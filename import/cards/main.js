@@ -1,4 +1,9 @@
 const CARDS = {
+    'door': {
+        'name': 'Entrance Door.',
+        'img_front': '',
+        'description': 'You cannot exit now, be sure to defeat the tower boss.'
+    },
     'gold': {
         'name': 'Gold',
         'img_front': '',
@@ -20,7 +25,9 @@ const CARDS = {
         'description': 'You encounter a fountain of life, get a little rest and recover your HP.'
     },
     'img_back': '',
-    'timeout': 3000
+    'timeout': 3000,
+    'max_enemies': 3, 
+    'explored': []
 }
 
 const ENEMY = {
@@ -68,13 +75,12 @@ const ENEMY = {
         'defense': 5,
         'initiative': 50,
         'skill': ''
-    },
-    'max_enemies': 3,
+    }
 }
 
 function createEnemy(tribe) {
     if(!(tribe in ENEMY)) {
-        let random = getRandom(Object.keys(ENEMY).length);
+        let random = getRandom(Object.keys(ENEMY).length - 1);
         tribe = Object.keys(ENEMY)[random];
     }
 
@@ -86,76 +92,111 @@ function createEnemy(tribe) {
     return enemy;
 }
 
+function exploredCard(id, lvl) {
+    let explored = false;
+    for(let c=0; c<CARDS.explored.length; c++) {
+        if(CARDS.explored[c] == id) {
+            alert('Already collected the loot of this room.');
+            explored = true;
+            setTimeout(function () {updateLevel(id, lvl)}, CARDS.timeout);
+        }
+    }
+    if(!explored)
+        CARDS.explored.push(id);
+    
+    return explored;
+}
+
 function createCard(id, type, lvl) {
     let card;
     switch(type) {
+        case 'door':
+            card = new Card(id, CARDS.door.name, type, CARDS.door.img_front,
+                CARDS.img_back, CARDS.door.description);
+            card.action = () => {
+                Player.direction = 'down';
+                setTimeout(function () {updateLevel(card.id, lvl)}, CARDS.timeout);
+            }
+            break;
         case 'gold':
             card = new Card(id, CARDS.gold.name, type, CARDS.gold.img_front, 
-                CARDS.img_back, CARDS.gold.description + `${5*lvl} gold.`);
+                CARDS.img_back, CARDS.gold.description + `${2*lvl} gold.`);
             card.action = () => {
-                Player.gold += 5*lvl;
-                setTimeout(function () {updateLevel(card.id, lvl)}, CARDS.timeout);
+                let explored = exploredCard(card.id, lvl);
+                if(!explored) {
+                    Player.gold += 2*lvl;
+                    setTimeout(function () {updateLevel(card.id, lvl)}, CARDS.timeout);
+                }
             }
             break;
         case 'arrow':
             card = new Card(id, CARDS.arrow.name, type, CARDS.arrow.img_front, 
-                CARDS.img_back, CARDS.arrow.description + `${lvl} arrows.`);
+                CARDS.img_back, CARDS.arrow.description + `${Math.round(lvl/2) + 1} arrows.`);
             card.action = () => {
-                Player.arrow += lvl;
-                setTimeout(function () {updateLevel(card.id, lvl)}, CARDS.timeout);
+                let explored = exploredCard(card.id, lvl);
+                if(!explored) {
+                    Player.arrows += Math.round(lvl/2) + 1;
+                    setTimeout(function () {updateLevel(card.id, lvl)}, CARDS.timeout);
+                }
             }
             break;
         case 'battle':
             card = new Card(id, CARDS.battle.name, type, CARDS.battle.img_front, 
                 CARDS.img_back, CARDS.battle.description);
             card.action = () => {
-                let enemies = [];
-                let max_enemies = getRandom(ENEMY.max_enemies) + 1;
-                switch(lvl) {
-                    case 1:
-                        for(let e=0; e<max_enemies; e++) {
-                            enemies.push(createEnemy('barbarian'));
-                        }
-                        break;
-                    case 2:
-                        for(let e=0; e<max_enemies; e++) {
-                            enemies.push(createEnemy('zombie'));
-                        }
-                        break;
-                    case 3:
-                        for(let e=0; e<max_enemies; e++) {
-                            enemies.push(createEnemy('skeleton'));
-                        }
-                        break;
-                    case 4:
-                        for(let e=0; e<max_enemies; e++) {
-                            enemies.push(createEnemy('ghost'));
-                        }
-                        break;
-                    case Path.rooms[Path.rooms.length - 1].lvl:
-                        enemies.push(createEnemy('demon'));
-                        break;
-                    default:
-                        for(let e=0; e<max_enemies; e++) {
-                            enemies.push(createEnemy());
-                        }
+                let explored = exploredCard(card.id, lvl);
+                if(!explored) {
+                    let enemies = [];
+                    let max_enemies = getRandom(CARDS.max_enemies) + 1;
+                    switch(lvl) {
+                        case 1:
+                            for(let e=0; e<max_enemies; e++) {
+                                enemies.push(createEnemy('barbarian'));
+                            }
+                            break;
+                        case 2:
+                            for(let e=0; e<max_enemies; e++) {
+                                enemies.push(createEnemy('zombie'));
+                            }
+                            break;
+                        case 3:
+                            for(let e=0; e<max_enemies; e++) {
+                                enemies.push(createEnemy('skeleton'));
+                            }
+                            break;
+                        case 4:
+                            for(let e=0; e<max_enemies; e++) {
+                                enemies.push(createEnemy('ghost'));
+                            }
+                            break;
+                        case Path.rooms[Path.rooms.length - 1].lvl:
+                            enemies.push(createEnemy('demon'));
+                            break;
+                        default:
+                            for(let e=0; e<max_enemies; e++) {
+                                enemies.push(createEnemy());
+                            }
+                    }
+                    for(e=0; e<enemies.length; e++) 
+                        Battle.addEnemy(enemies[e]);
+                    last_battle = card.id;
+                    setTimeout(startBattle, CARDS.timeout);
                 }
-                for(e=0; e<enemies.length; e++) 
-                    Battle.addEnemy(enemies[e]);
-                last_battle = card.id;
-                setTimeout(startBattle, CARDS.timeout);
             };
             break;
         case 'fountain':
             card = new Card(id, CARDS.fountain.name, type, CARDS.fountain.img_front, 
                 CARDS.img_back, CARDS.fountain.description);
             card.action = () => {
-                for(a=0; a < Battle.allies.length; a++) {
-                    Battle.allies[a].life += 5*lvl;
-                    if(Battle.allies[a].life > Battle.allies[a].max_life)
-                        Battle.allies[a].life = Battle.allies[a].max_life
+                let explored = exploredCard(card.id, lvl);
+                if(!explored) {
+                    for(a=0; a < Battle.allies.length; a++) {
+                        Battle.allies[a].life += 5*lvl;
+                        if(Battle.allies[a].life > Battle.allies[a].max_life)
+                            Battle.allies[a].life = Battle.allies[a].max_life
+                    }
+                    setTimeout(function () {updateLevel(card.id, lvl)}, CARDS.timeout);
                 }
-                setTimeout(function () {updateLevel(card.id, lvl)}, CARDS.timeout);
             };
     }
     return card;
@@ -163,8 +204,10 @@ function createCard(id, type, lvl) {
 
 function createDeck() {
     let random;
-    let id = 1;
+    let id = 0;
     let card_row = [];
+    Deck.addCard(createCard(id, 'door', 0));
+    id++;
     for(let lvl=1; lvl<Path.rooms[Path.rooms.length - 1].lvl + 1; lvl++) {
         floor = Path.getRoomsByLvl(lvl);
         if(floor.length == 1) {
@@ -243,10 +286,21 @@ function createDeck() {
 function showCards(id, grid) {
     grid.innerHTML = '';
     let room = Path.getRoomById(id);
-    let cards_id = room.connections.next.sort();
+    let cards_id = [];
+    if(Player.direction === 'down')
+        cards_id = room.connections.next.sort();
+    else
+        cards_id = room.connections.prev.sort();
 
-    for(let card=0; card<cards_id.length; card++)
-        grid.appendChild(Deck.getCardById(cards_id[card]).toHTML());
+    if(!cards_id.length) {
+        alert('This room has no exit, go back.')
+        changeDirection();
+        setTimeout(function () {showCards(id, grid)}, CARDS.timeout);
+    }
+    else {
+        for(let card=0; card<cards_id.length; card++)
+            grid.appendChild(Deck.getCardById(cards_id[card]).toHTML());
+    }
 }
 
 function createSimpleCardHTML(id, name, type, img_front, description) {

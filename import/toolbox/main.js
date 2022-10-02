@@ -2,12 +2,12 @@ function getRandom(max) {
     return Math.floor(Math.random() * max);
 }
 
-function createButton(id, cl, text, action) {
-    let button = document.createElement('button');
-    button.id = id;
-    button.classList.add(cl);
-    button.innerHTML = text;
-    button.addEventListener("click", action);
+function createHTML(tag, id, cl, text, action='') {
+    let element = document.createElement(tag);
+    element.id = id;
+    element.classList.add(cl);
+    element.innerHTML = text;
+    element.onclick = action;
 
-    return button;
+    return element;
 }
