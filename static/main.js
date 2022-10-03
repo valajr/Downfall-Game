@@ -49,7 +49,8 @@ function updateInfoBar() {
     let info_bar = document.querySelectorAll('.info');
     info_bar[0].innerHTML = `Gold: ${Player.gold}`;
     info_bar[1].innerHTML = `Arrows: ${Player.arrows}`;
-    info_bar[2].innerHTML = `Direction: ${Player.direction}`;
+    let direction = document.querySelector('#direction');
+    direction.innerHTML = `Direction: ${Player.direction}`;
 }
 
 function createPlayer() {
@@ -64,8 +65,7 @@ function createPlayer() {
 
     let gold = createHTML('span', 'gold', 'info', `Gold: ${Player.gold}`);
     let arrows = createHTML('span', 'arrows', 'info', `Arrows: ${Player.arrows}`);
-    let direction = createHTML('button', 'direction', 'info', `Direction: ${Player.direction}`, goAnotherDirection);
-    direction.classList.add('button');
+    let direction = createHTML('button', 'direction', 'button', `Direction: ${Player.direction}`, goAnotherDirection);
     info_bar.appendChild(gold);
     info_bar.appendChild(arrows);
     info_bar.appendChild(direction);
