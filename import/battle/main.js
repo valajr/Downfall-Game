@@ -1,10 +1,10 @@
 const BATTLE = {
-    player_img: '',
-    barbarian_img: '',
-    zombie_img: '',
-    skeleton_img: '',
-    ghost_img: '',
-    demon_img: ''
+    player_img: 'import/img/player.png',
+    barbarian_img: 'import/img/barbarian.png',
+    zombie_img: 'import/img/zombie.png',
+    skeleton_img: 'import/img/skeleton.png',
+    ghost_img: 'import/img/ghost.png',
+    demon_img: 'import/img/demon.png'
 }
 
 const NAMES = {

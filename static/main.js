@@ -65,6 +65,7 @@ function createPlayer() {
     let gold = createHTML('span', 'gold', 'info', `Gold: ${Player.gold}`);
     let arrows = createHTML('span', 'arrows', 'info', `Arrows: ${Player.arrows}`);
     let direction = createHTML('button', 'direction', 'info', `Direction: ${Player.direction}`, goAnotherDirection);
+    direction.classList.add('button');
     info_bar.appendChild(gold);
     info_bar.appendChild(arrows);
     info_bar.appendChild(direction);
@@ -78,11 +79,3 @@ function startBattle() {
 }
 
 createPlayer();
-
-/* Need fix: 
- - Auto battle doesn't work all times
- - Double alert if lose and have more than one enemy
- - When you go up, the next connection of room doesn't reveal on map
- - Position of the cards doesn't match with rooms on map
- - styling of info bar
- - Art of the game*/

@@ -1,27 +1,27 @@
 const CARDS = {
     'door': {
         'name': 'Entrance Door.',
-        'img_front': '',
+        'img_front': 'import/img/door.png',
         'description': 'You cannot exit now, be sure to defeat the tower boss.'
     },
     'gold': {
         'name': 'Gold',
-        'img_front': '',
+        'img_front': 'import/img/gold.png',
         'description': 'In this room, you found '
     },
     'arrow': {
         'name': 'Arrow',
-        'img_front': '',
+        'img_front': 'import/img/arrow.png',
         'description': 'In this room, you found '
     },
     'battle': {
         'name': 'Battle',
-        'img_front': '',
+        'img_front': 'import/img/battle.png',
         'description': 'You encounter some enemies, be carefull.'
     },
     'fountain': {
         'name': 'Fountain of Life',
-        'img_front': '',
+        'img_front': 'import/img/fountain.png',
         'description': 'You encounter a fountain of life, get a little rest and recover your HP.'
     },
     'img_back': '',
@@ -144,44 +144,41 @@ function createCard(id, type, lvl) {
             card = new Card(id, CARDS.battle.name, type, CARDS.battle.img_front, 
                 CARDS.img_back, CARDS.battle.description);
             card.action = () => {
-                let explored = exploredCard(card.id, lvl);
-                if(!explored) {
-                    let enemies = [];
-                    let max_enemies = getRandom(CARDS.max_enemies) + 1;
-                    switch(lvl) {
-                        case 1:
-                            for(let e=0; e<max_enemies; e++) {
-                                enemies.push(createEnemy('barbarian'));
-                            }
-                            break;
-                        case 2:
-                            for(let e=0; e<max_enemies; e++) {
-                                enemies.push(createEnemy('zombie'));
-                            }
-                            break;
-                        case 3:
-                            for(let e=0; e<max_enemies; e++) {
-                                enemies.push(createEnemy('skeleton'));
-                            }
-                            break;
-                        case 4:
-                            for(let e=0; e<max_enemies; e++) {
-                                enemies.push(createEnemy('ghost'));
-                            }
-                            break;
-                        case Path.rooms[Path.rooms.length - 1].lvl:
-                            enemies.push(createEnemy('demon'));
-                            break;
-                        default:
-                            for(let e=0; e<max_enemies; e++) {
-                                enemies.push(createEnemy());
-                            }
-                    }
-                    for(e=0; e<enemies.length; e++) 
-                        Battle.addEnemy(enemies[e]);
-                    last_battle = card.id;
-                    setTimeout(startBattle, CARDS.timeout);
+                let enemies = [];
+                let max_enemies = getRandom(CARDS.max_enemies) + 1;
+                switch(lvl) {
+                    case 1:
+                        for(let e=0; e<max_enemies; e++) {
+                            enemies.push(createEnemy('barbarian'));
+                        }
+                        break;
+                    case 2:
+                        for(let e=0; e<max_enemies; e++) {
+                            enemies.push(createEnemy('zombie'));
+                        }
+                        break;
+                    case 3:
+                        for(let e=0; e<max_enemies; e++) {
+                            enemies.push(createEnemy('skeleton'));
+                        }
+                        break;
+                    case 4:
+                        for(let e=0; e<max_enemies; e++) {
+                            enemies.push(createEnemy('ghost'));
+                        }
+                        break;
+                    case Path.rooms[Path.rooms.length - 1].lvl:
+                        enemies.push(createEnemy('demon'));
+                        break;
+                    default:
+                        for(let e=0; e<max_enemies; e++) {
+                            enemies.push(createEnemy());
+                        }
                 }
+                for(e=0; e<enemies.length; e++) 
+                    Battle.addEnemy(enemies[e]);
+                last_battle = card.id;
+                setTimeout(startBattle, CARDS.timeout);
             };
             break;
         case 'fountain':
